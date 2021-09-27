@@ -1,5 +1,6 @@
-import requests, threading, os
+import requests, threading, os, time, re, imagesize, dictionary_generator
 from bs4 import BeautifulSoup
+from PIL import Image
 from colorama import Fore, init
 
 # ---------------- # INICIO # ---------------- #
@@ -21,8 +22,17 @@ headers = {
 }
 
 # ---------------- # FUNCTIONS # ---------------- #
-def check_img(data):
-    pass
+def check_img():
+    while True:
+        for img in os.listdir("images"):
+            img_size = os.path.getsize(f'images/{img}')
+            width, height = imagesize.get(f'images/{img}')
+            
+            if img_size == 503 and width == 161 and height == 81:
+                os.remove(f"images/{img}")
+                print(Fore.LIGHTMAGENTA_EX + f"[·] Deleted bad image: " + Fore.LIGHTWHITE_EX + img + Fore.RESET)
+
+        time.sleep(60)
 
 def get_url(code):
     try:
@@ -39,8 +49,6 @@ def get_img(url, code, x):
         response = requests.get(url, headers=headers) # , proxies=proxies
         if response.status_code == 200:
             data = response.content
-
-            check_img(data) # work in progress
 
             with open(f"images/{code}.png", 'wb') as f:
                 f.write(data)
@@ -66,8 +74,6 @@ def dict_mode():
         x = x + 1
 
 # ---------------- # START # ---------------- #
+print("-----------------------------------------------------")
+threading.Thread(target=check_img, args=[]).start()
 dict_mode()
-
-# code = "ziqyxq"
-# url = get_url(code)
-# threading.Thread(target=get_img, args=[url, code]).start()
